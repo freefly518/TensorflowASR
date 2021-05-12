@@ -1,0 +1,14 @@
+
+*.xml
+*.pyc
+*.iml
+*.v2
+*.txt
+*.h5
+*.npy
+*.yml
+*.data-00000-of-00001
+*.index
+*.meta
+*.json
+*.npz

@@ -1,7 +1,7 @@
 
-import numpy as np
 import tensorflow as tf
 from AMmodel.layers.time_frequency import Spectrogram,Melspectrogram
+from AMmodel.wav_model import WavePickModel
 try:
     from ctc_decoders import ctc_greedy_decoder, ctc_beam_search_decoder
     USE_TF=0
@@ -38,6 +38,11 @@ class CtcModel(tf.keras.Model):
                                                 n_dft=1024,
                                                 trainable_kernel=speech_config['trainable_kernel']
                                                 )
+            self.mel_layer.trainable=speech_config['trainable_kernel']
+        self.wav_info=speech_config['add_wav_info']
+        if self.wav_info:
+            assert speech_config['use_mel_layer']==True,'shold set use_mel_layer is True'
+
         self.fc = tf.keras.layers.TimeDistributed(
             tf.keras.layers.Dense(units=num_classes, activation="linear",
                                   use_bias=True), name="fully_connected")
@@ -47,7 +52,6 @@ class CtcModel(tf.keras.Model):
         self(features, training=False)
 
     def summary(self, line_length=None, **kwargs):
-        self.encoder.summary(line_length=line_length, **kwargs)
         super(CtcModel, self).summary(line_length, **kwargs)
 
     def add_featurizers(self,
@@ -60,10 +64,18 @@ class CtcModel(tf.keras.Model):
     # @tf.function(experimental_relax_shapes=True)
     def call(self, inputs, training=False, **kwargs):
         if self.mel_layer is not None:
-            inputs=self.mel_layer(inputs)
+            if self.wav_info :
+                wav=inputs
+                inputs=self.mel_layer(inputs)
+            else:
+                inputs=self.mel_layer(inputs)
             # print(inputs.shape)
-        outputs = self.encoder(inputs, training=training)
-        outputs = self.fc(outputs, training=training)
+        if self.wav_info :
+            enc_outputs = self.encoder([inputs,wav], training=training)
+        else:
+            enc_outputs = self.encoder(inputs, training=training)
+        outputs = self.fc(enc_outputs, training=training)
+
         return outputs
 
     def return_pb_function(self,shape,beam=False):

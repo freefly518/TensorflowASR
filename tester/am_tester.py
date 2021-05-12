@@ -15,12 +15,11 @@ class AMTester(BaseTester):
 
 
     def _eval_step(self, batch):
-        features, wavs, input_length, labels, label_length = batch
+        features,  input_length, labels, label_length = batch
 
-        if self.model.mel_layer is not None:
-            pred_decode = self.model.recognize_pb(wavs, input_length)[0]
-        else:
-            pred_decode = self.model.recognize_pb(features, input_length)[0]
+
+        pred_decode = self.model.recognize_pb(features, input_length)[0]
+
 
         if 'CTC' in self.model_type:
             pred_decode=tf.clip_by_value(pred_decode,0,self.text_featurizer.num_classes)
@@ -58,9 +57,10 @@ class AMTester(BaseTester):
                 if self.text_featurizer.stop in i:
                     index=i.index(self.text_featurizer.stop)
                     i=i[:index]
-                index=j.index(self.text_featurizer.stop)
-                j=j[:index]
-            score, ws, wd, wi = wer(i, j)
+                if self.text_featurizer.stop in j:
+                    index=j.index(self.text_featurizer.stop)
+                    j=j[:index]
+            score, ws, wd, wi = wer(j, i)
             self.cer_s+=ws
             self.cer_d+=wd
             self.cer_i+=wi

@@ -6,7 +6,7 @@
 </p>
 </h1>
 <h2 align="center">
-<p>集成了Tensorflow 2版本的端到端语音识别模型</p>
+<p>集成了Tensorflow 2版本的端到端语音识别模型，并且RTF(实时率)在0.1左右</p>
 </h2>
 <p align="center">
 目前集成了中文的CTC\Transducer\LAS 三种结构
@@ -16,11 +16,18 @@
 </p>
 <p align="center">
 欢迎使用并反馈bug
-
-[English](https://github.com/Z-yq/TensorflowASR/blob/master/README_en.md)|中文版
 </p>
 
+[English](https://github.com/Z-yq/TensorflowASR/blob/master/README_en.md)|中文版
 
+
+## 其它项目
+
+TTS：https://github.com/Z-yq/TensorflowTTS
+
+NLU:  -
+
+BOT:  -
 
 
 ## Mel Layer
@@ -45,38 +52,23 @@ C++的demo已经提供。
 
 所有结果测试于 _`AISHELL TEST`_ 数据集.
 
+**RTF**(实时率) 测试于**CPU**单核解码任务。 
+
+
 **AM:**
 
-Model Name|Mel layer(USE/TRAIN)| link                                          |code|train data        |txt CER|phoneme CER|Model Size|
-----------|--------------------|-----------------------------------------------|----|------------------|-------|-----------|---------|
-MultiTask |False/False|pan.baidu.com/s/1nDDqcJXBbpFJASYz_U8FfA        |ucqf|aishell2(10 epochs)|10.4   |8.3        |109M|
-ConformerRNNT(S)|True/True|pan.baidu.com/s/1bdqeLDBHQ_XmgNuUr6mflw|fqvf|aishell2(10 epochs)|-|9.7|61M|
-ConformerCTC(S)|True/True|pan.baidu.com/s/1sh2bUm1HciE6Fu7PHUfRGA|jntv|aishell2(10 epochs)|-|9.9|46M|
-ConformerCTC2(S)|True/False|pan.baidu.com/s/12hsjq-lWudeaQzQomV-PDw|ifm6|aishell2(10 epochs)|-|8.1|46M|
-ConformerCTC3(S)|False/False|pan.baidu.com/s/1zKDgMHfpOhw10pOSWmtLrQ|gmr5|aishell2(10 epochs)|-|7.0|46M|
+Model Name|Mel layer(USE/TRAIN)| link                                          |code|train data        |phoneme CER(%)|Params Size|RTF|
+----------|--------------------|-----------------------------------------------|----|------------------|-----------|---------|-----|
+ConformerCTC(M)|True/False|pan.baidu.com/s/1NPk17DUr0-lBgwCkC5dFuQ|7qmd|aishell-1(20 epochs)| 6.2/5.1| 32M|0.114|
+ConformerCTS(S)|True/False|pan.baidu.com/s/1mHR2RryT7Rw0D4I9caY0QQ|7g3n|aishell-1(20 epochs)| 9.1/8.7| 10M|0.056|
 
 **LM:**
 
-Model Name|O2O(Decoder)| link |code|train data|txt cer|model size|params size|
----------|----|------|----|-------|------|----------|-----------|
-TransformerO2OE|True(False)|pan.baidu.com/s/1lyqHGacYd7arBrJtlTFdTw|kw0y|aishell2 text(98k steps)|4.4|200M|52M|
-TransformerO2OED|True(True)|pan.baidu.com/s/1acvCRpS2j16dxLoCyToB6A|jrfi|aishell2 text(10k steps)|6.2|217M|61M|
-Transformer|True(True)|pan.baidu.com/s/1W3HLNNGL3ceJfoxb0P7RMw|qeet|aishell2 text(10k steps)|8.6|233M|61M|
-TransformerPunc|False(True)|pan.baidu.com/s/1umwMP2nIzr25NnvG3LTRvw|7ctd|翻译文本|-|76M|30M|
-
-**Speed:**
-
-AM 速度测试(基于Python), 一条约4.1秒的音频 **CPU**响应速度为:
-
-|CTC    |Transducer|LAS  |
-|-------|----------|-----|
-|150ms  |350ms     |280ms|
-
-LM 速度测试(基于Python),12个字的响应速度 **CPU**:
-
-|O2O-Encoder-Decoder|O2O-Encoder|Encoder-Decoder|
-|-------------------|-----------|---------------|
-|              100ms|       20ms|          300ms|
+Model Name|O2O(Decoder)| link |code|train data|txt cer|model size|params size|RTF|
+---------|----|------|----|-------|------|----------|-----------|-----|
+TransformerO2OE|True(False)|pan.baidu.com/s/1X11OE_sk7yNTjtDpU7sfvA|sxrw|aishell-1 text(30 epochs)|4.4|43M|10M|0.06|
+TransformerO2OED|True(True)|pan.baidu.com/s/1acvCRpS2j16dxLoCyToB6A|jrfi|aishell2 text(10k steps)|6.2|217M|61M|0.13|
+PuncTransformer|True(False)|pan.baidu.com/s/1b_6eKEWfL50pmvuS7ZRimg|47f5|NLP开源数据|-|38M|10M|0.005|
 
 **快速使用：**
 
@@ -96,10 +88,11 @@ LM 速度测试(基于Python),12个字的响应速度 **CPU**:
 ## What's New?
 
 最新更新
-
+- 增加了标点恢复的模型和预训练模型
+- 优化了一些逻辑
 - Change RNNT predict to support C++
 - Add C++ Inference Demo,detail in [cppinference](https://github.com/Z-yq/TensorflowASR/tree/master/CppInference)
-    
+  
 
 ## Supported Structure
 -  **CTC**
@@ -150,10 +143,27 @@ LM 速度测试(基于Python),12个字的响应速度 **CPU**:
     text2
     ……
     ```
+   **punc_train_list**格式：
+   ```text
+    text1
+    text2
+    ……
+    ```
+   同LM的格式，每行的text包含标点，目前标点只支持每个字后跟一个标点，连续的标点视为无效。
+   
+   比如：
+   
+   这是：一个例子哦。 √
+   
+   这是：“一个例子哦”。 ×
+   
+   这是：一个例子哦“。 ×
+   
 2. 下载bert的预训练模型，用于LM的辅助训练，如果你不需要LM可以跳过:
             
+    
         https://pan.baidu.com/s/1_HDAhfGZfNhXS-cYoLQucA extraction code: 4hsa
-        
+    
 3. 修改配置文件 **_`am_data.yml`_** (in ./configs)来设置一些训练的选项，以及修改**model yaml**（如：./configs/conformer.yml） 里的`name`参数来选择模型结构。
 4. 然后执行命令:
   
@@ -174,7 +184,7 @@ LM 速度测试(基于Python),12个字的响应速度 **CPU**:
     am.load_model(training=False)
     
     lm=LM(lm_config)
-    lm.load_model()
+    lm.load_model(training=False)
     
     am_result=am.predict(wav_path)
     if am.model_type=='Transducer':
@@ -185,7 +195,7 @@ LM 速度测试(基于Python),12个字的响应速度 **CPU**:
         am_result=am.decode(am_result[0])
         lm_result=lm.predict(am_result)
         lm_result = lm.decode(lm_result[0].numpy(), self.lm.word_featurizer)
-   
+      
     ```
 也可以使用**Tester** 来大批量测试数据验证你的模型性能:
 
