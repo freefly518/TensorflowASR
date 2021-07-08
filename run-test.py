@@ -75,6 +75,7 @@ if __name__ == '__main__':
     # import tensorflow as tf
     # tf.config.threading.set_inter_op_parallelism_threads(1)
     # tf.config.threading.set_intra_op_parallelism_threads(1)
+
     am_config = UserConfig(r'./conformerCTC(M)/am_data.yml', r'./conformerCTC(M)/conformerM.yml')
     lm_config = UserConfig(r'./transformer-logs/lm_data.yml', r'./transformer-logs/transformerO2OE.yml')
     punc_config = UserConfig(r'./punc_model/punc_settings.yml', r'./punc_model/punc_settings.yml')
